@@ -1,0 +1,9 @@
+#!/home/vchn189/get_post/Django_GETandPOST/get/bin/python
+# EASY-INSTALL-ENTRY-SCRIPT: 'Django==1.11.6','console_scripts','django-admin'
+__requires__ = 'Django==1.11.6'
+import sys
+from pkg_resources import load_entry_point
+
+sys.exit(
+   load_entry_point('Django==1.11.6', 'console_scripts', 'django-admin')()
+)
