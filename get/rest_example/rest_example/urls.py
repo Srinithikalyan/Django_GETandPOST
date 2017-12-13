@@ -16,12 +16,14 @@ Including another URLconf
 
 from django.conf.urls import include, url
 from django.contrib import admin
-from restapp import views
+#from restapp import views
 
 admin.autodiscover()
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^employees/', views.EmployeeList.as_view()),
-    url(r'^employees/(?P<pk>[0-9]+)/$', views.EmployeeDetail.as_view()),
+    url(r'^employees/',include('restapp.urls')),
+    #url(r'^employees/', views.EmployeeList.as_view()),
+#    url(r'^employees/(?P<pk>[0-9]+)/$', views.EmployeeDetail.as_view()),
+   # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
