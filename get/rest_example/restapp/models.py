@@ -1,18 +1,21 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+import uuid
+from cassandra.cqlengine import columns
+from django_cassandra_engine.models import DjangoCassandraModel 
 
-from django.db import models
 
-# Create your models here.
-
-class Employee(models.Model):
-    employee_id = models.IntegerField(primary_key=True)
-    employee_name = models.CharField(max_length=50)
-    email = models.CharField(max_length=100)
-
+class Employee(DjangoCassandraModel):
+    employee_id = columns.UUID(primary_key=True, default=uuid.uuid4())
+    employee_name = columns.Text(max_length=50)
+    email = columns.Text(max_length=100)
+    password = columns.Text(max_length=10)
+    
     class Meta:
         verbose_name = "Employee"
         verbose_name_plural = "Employees"
 
     def __unicode__(self):
-        return '%d %s %s' % (self.employee_id,self.employee_name,self.email)
+        return '%d %s %s %s' % (self.employee_id,self.employee_name,self.email,self.password)
+
+
+
+

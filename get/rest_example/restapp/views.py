@@ -1,65 +1,48 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from django.shortcuts import render
-
-# Create your views here.
-
-
 from django.contrib.auth.models import User
 from django.http import Http404
 from models import Employee
-from serializers import EmployeeSerializer
+from serializers import EmployeeSerializer, DisplaySerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import viewsets, status
 
-class EmployeeList(APIView):
-    """
-    List all employees, or create a new employee.
-    
-    """
-    def get(self, request, format=None):
-        users = Employee.objects.all()
-        serializer = EmployeeSerializer(users, many=True)
-        return Response(serializer.data)
+class DisplayView(viewsets.ModelViewSet):
+    model = Employee
+    serializer_class = DisplaySerializer
 
-    def post(self, request, format=None):
-        serializer = EmployeeSerializer(data=request.DATA)
+    def get_queryset(self):
+        return Employee.objects.filter()
+
+class EmployeeView(viewsets.ModelViewSet):
+    model = Employee
+    serializer_class = EmployeeSerializer
+
+    def get_queryset(self):
+        return Employee.objects.filter()
+
+    def retrieve(self, request, *args, **kwargs):
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        objects = Employee.objects.get(**filter_kwargs)
+        serializer = DisplaySerializer(objects)
+	print("ghhhhhhhhhhhhhhhhhhhhhh")
+        return Response({'employee_details': serializer.data})
+
+    def create(self, request, *args, **kwargs):
+        serializer = EmployeeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': "Successfully Created"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk, format=None):
-        user = self.get_object(pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class EmployeeDetail(APIView):
-    """
-    Retrieve, update or delete a employee instance.
-    """
-    def get_object(self, pk):
-        try:
-            return Employee.objects.get(pk=pk)
-        except Employee.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        user = self.get_object(pk)
-        user = EmployeeSerializer(user)
-        return Response(user.data)
-
-    def put(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = EmployeeSerializer(user, data=request.DATA)
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': "Successfully Updated"}, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk, format=None):
-        user = self.get_object(pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
